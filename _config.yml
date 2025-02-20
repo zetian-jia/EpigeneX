@@ -9,7 +9,7 @@ color_scheme: stanford
 
 # Aux links
 aux_links:
-  'zezeze':
+  'github.io':
     - 'https://zetian-jia.github.io/EpigeneX/'
 aux_links_new_tab: true
 

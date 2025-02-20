@@ -3,6 +3,30 @@ title: Home
 layout: home
 ---
 
+
+Welcome to my personal website! I am Zhetian Jia, a PhD student in Epigenetics, specializing in DNA methylation research. My work primarily focuses on how cutting-edge liquid biopsy technologies can help uncover early diagnostic and prognostic biomarkers for neurological diseases.
+
+In my research, I explore how DNA methylation changes impact gene regulation, aging, and disease development, particularly in neurological diseases and cancer. My current focus includes:
+
+- **Dynamic Changes in DNA Methylation**: Using liquid biopsy techniques to analyze cfDNA in peripheral blood, I investigate how methylation patterns correlate with the onset, progression, and prognosis of various diseases.
+- **Single-Cell Analysis**: I utilize single-cell methylation data to explore the epigenetic modifications of neural cell populations, with particular emphasis on diseases like Moyamoya.
+- **Innovative Technologies**: I am developing and applying novel micro DNA modification detection methods and high-throughput data analysis workflows to bridge the gap between genomic research and clinical applications.
+
+On this site, you will find updates on my research progress in DNA methylation, liquid biopsy, and neuroscience. I also share reviews and insights on recent developments in epigenetics.
+
+Feel free to explore my research, technical implementations, and my broader thoughts on epigenetics. If you have any questions or collaboration opportunities, don't hesitate to reach out!
+
+----
+
+**Research Areas:**
+
+- **DNA Methylation in Neurological Diseases**
+- **Liquid Biopsy Techniques & cfDNA Analysis**
+- **Single-Cell Methylation and Gene Function Research**
+- **Epigenetic Technology Development & Data Analysis**
+
+---
+
 This is a *bare-minimum* template to create a Jekyll site that uses the [Just the Docs] theme. You can easily set the created site to be published on [GitHub Pages] – the [README] file explains how to do that, along with other details.
 
 If [Jekyll] is installed on your computer, you can also build and preview the created site *locally*. This lets you test changes before committing them, and avoids waiting for GitHub Pages.[^1] And you will be able to deploy your local build to a different platform than GitHub Pages.
