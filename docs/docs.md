@@ -24,7 +24,7 @@ Document my PhD research
 
 ## Contact
 
-- Email: jztneurosurgery[at]hotmail.com
+- Email: jztneurosurgery@hotmail.com
 
 
 

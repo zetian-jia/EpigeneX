@@ -8,7 +8,7 @@ permalink: /docs/tutorials
 ---
 
 
-<img src="/assets/images/AAIC2023_MG.png" style="border:1px solid #dfdfdf;border-radius:0.25rem;" />
+<!-- <img src="/assets/images/AAIC2023_MG.png" style="border:1px solid #dfdfdf;border-radius:0.25rem;" /> -->
 
 # Tutorials
 
