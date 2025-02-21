@@ -56,6 +56,24 @@ conda config --get channels
 conda config --show channels
 ```
 
+channels file:
+```bash
+cat ~/.condarc
+```
+
+if want to add channels directly in the command line, use the following command:
+
+```shell
+channels:
+  - https://mirrors.bfsu.edu.cn/anaconda/cloud/bioconda/
+  - https://mirrors.bfsu.edu.cn/anaconda/cloud/conda-forge/
+  - https://mirrors.bfsu.edu.cn/anaconda/pkgs/main/
+  - https://mirrors.bfsu.edu.cn/anaconda/pkgs/free/
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+show_channel_urls: true
+```
+
 ## Using conda
 
 Now that you have installed and added the necessary channels, you can use conda to install and manage software packages.
@@ -89,6 +107,11 @@ conda deactivate
 
 ### STEP-3: Install packages
 
+before installing a package, get the package name 
+```bash
+conda search bedtools
+```
+
 To install a package, use the following command:
 
 ```bash
@@ -112,4 +135,71 @@ conda env list
 conda info --envs
 ```
 
+### STEP-5: Remove conda packages
+
+To remove a conda environment, use the following command:
+
+```bash
+conda activate methylTracer
+
+conda remove numpy
+```
+
+remove conda environment:
+
+```bash
+conda env remove --name methylTracer
+```
+
 ## advanced conda
+
+### environment export
+
+you can export the environment to a file:
+
+```bash
+conda activate methylTracer
+
+conda env export > environment.met.yml
+```
+
+### environment install yml file
+
+install yml file:
+
+```bash
+conda env create -f environment.met.yml
+```
+
+
+### source activate
+
+you can use the following command to activate the environment:
+
+```bash
+source ~/miniconda3/etc/profile.d/conda.sh
+
+conda activate methylTracer
+```
+
+### init `.bashrc` or `.zshrc`
+
+
+add the following code to your `.bashrc` or `.zshrc` file:
+
+```shell
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/jiazet/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/jiazet/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/jiazet/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/jiazet/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+```
