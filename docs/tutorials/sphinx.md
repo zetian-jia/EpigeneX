@@ -50,7 +50,7 @@ sphinx-quickstart
 
 ```
 
-{. info-title}
+{: .info-title }
 > reStructuredText
 >
 > toctree是 reStructuredText指令，一种用途非常广泛的标记
