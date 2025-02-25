@@ -135,8 +135,8 @@ donot use docker desktop
 {
  "proxies": {
    "default": {
-     "httpProxy": "http://twb.showmyip.top:11801",
-     "httpsProxy": "http://twb.showmyip.top:11801",
+     "httpProxy": "http://twb.show.101",
+     "httpsProxy": "http://twb.show.01",
      "noProxy": "*.test.example.com,.example.org,127.0.0.0/8"
    }
  }
@@ -153,12 +153,12 @@ latest: Pulling from library/alpine
 f18232174bc9: Pull complete 
 Digest: sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
 Status: Downloaded newer image for alpine:latest
-HTTPS_PROXY=http://twb.showmyip.top:11801
+HTTPS_PROXY=http://twb.sho1
 no_proxy=*.test.example.com,.example.org,127.0.0.0/8
 NO_PROXY=*.test.example.com,.example.org,127.0.0.0/8
-https_proxy=http://twb.showmyip.top:11801
-http_proxy=http://twb.showmyip.top:11801
-HTTP_PROXY=http://twb.showmyip.top:11801
+https_proxy=http://twb.showm801
+http_proxy=http://twb.showmyip01
+HTTP_PROXY=http://twb.showmy01
 ```
 
 {: .info-title}
@@ -232,7 +232,7 @@ demo
 ```bash
 docker -H tcp://174.17.0.1:2376 ps
 
-docker -H ssh://jiazetian@210.42.120.57 ps
+docker -H ssh://jiazetian@57 ps
 ```
 按照惯例，Docker 守护进程使用端口2376进行安全的 TLS 连接，并使用端口2375进行不安全的非 TLS 连接
 
@@ -298,54 +298,6 @@ Environment=HTTP_PROXY=http://127.0.0.1:7890 HTTPS_PROXY=http://127.0.0.1:7890 N
 export http_proxy="http://127.0.0.1:7890"
 export https_proxy="http://127.0.0.1:7890"
 ```
-
-BINGO
-```
-(base) ➜  bioconductor_compose git:(main) ✗ singularity pull docker://rocker/rstudio:4.4.2   
-INFO:    Converting OCI blobs to SIF format
-INFO:    Starting build...
-Getting image source signatures
-Copying blob 4927158e7cb8 done   | 
-Copying blob 98b4444c3e59 done   | 
-Copying blob 5fa970fe3a02 done   | 
-Copying blob 5a7813e071bf done   | 
-Copying blob 619d6b2dbf39 done   | 
-Copying blob c431a6837342 done   | 
-Copying blob a0d63a8d22d5 done   | 
-Copying blob d8833c1fcb77 done   | 
-Copying blob 8d545f1f0f82 done   | 
-Copying blob a0f19b4e324e done   | 
-Copying blob 1d1f3f67e298 done   | 
-Copying blob 8a85ff299c33 done   | 
-Copying blob a2b7b22245e9 done   | 
-Copying blob 9bf9bf0e922b done   | 
-Copying blob 12381b307ecb done   | 
-Copying blob 2617b2670e16 done   | 
-Copying blob dee49bb49d26 done   | 
-Copying blob e6bb380d519e done   | 
-Copying config 5669edbdbc done   | 
-Writing manifest to image destination
-2025/02/26 03:04:51  info unpack layer: sha256:5a7813e071bfadf18aaa6ca8318be4824a9b6297b3240f2cc84c1db6f4113040
-2025/02/26 03:04:51  info unpack layer: sha256:619d6b2dbf391df5086ca4150c1d560840f2d136f84e0cb1a7eaa47730a0b678
-2025/02/26 03:04:51  info unpack layer: sha256:98b4444c3e59cf844097fd83f23c5871eefa7192c9bdfb16360819d44cf41d62
-2025/02/26 03:04:54  info unpack layer: sha256:5fa970fe3a02f44f436da8f9bff5221ecd4beae0972419070fe27d6b076872fc
-2025/02/26 03:04:54  info unpack layer: sha256:4927158e7cb86741814c82d851c8450bdf71f5df6e9677d9e85a7f18865d3610
-2025/02/26 03:04:54  info unpack layer: sha256:c431a6837342ec8c4aedf8e4dc2f2f123dbc996404347b63799cb113649708df
-2025/02/26 03:04:54  info unpack layer: sha256:a0d63a8d22d514a030c5b445f408a34f87a91d30975dde76c2365111de78c74c
-2025/02/26 03:04:54  info unpack layer: sha256:d8833c1fcb77e92d3c3fe41ed915f82bc158e05aa196543a4bc9e8db0d09dfa8
-2025/02/26 03:04:54  info unpack layer: sha256:8d545f1f0f8201a2019dbd222715d72331df3c9e3a8bdd3c7d8bbee97b3290fc
-2025/02/26 03:04:54  info unpack layer: sha256:a0f19b4e324ef03f31321b1082dcc44ab69eb730accc0817e611463603fcaa21
-2025/02/26 03:04:54  info unpack layer: sha256:1d1f3f67e298288fa5cc42b6f6b3ae69a18f00176596059820a9ef113010b05b
-2025/02/26 03:04:54  info unpack layer: sha256:8a85ff299c334b2ad91ee0b794d9e40af87e745516fc09973aa0c1b3ea74deac
-2025/02/26 03:04:54  info unpack layer: sha256:a2b7b22245e9c5d213ced9b9ec39e3c15b9283c3be90db72f577435ff4816bd1
-2025/02/26 03:04:58  info unpack layer: sha256:9bf9bf0e922b72297a41052aa9821591823e6119c6d7b9d0469bea687be47335
-2025/02/26 03:04:58  info unpack layer: sha256:12381b307ecb335a95180ad7bfef901e8ec72f64aa5d9fe5d45eafe2185cdd73
-2025/02/26 03:04:58  info unpack layer: sha256:2617b2670e163d44a2c0cadb57e5dd7807d99ec7f2c9a8280fe5f584039cf3a3
-2025/02/26 03:04:58  info unpack layer: sha256:dee49bb49d2645d4cd4f41256dd81d2fa48d3b6bbdf118237eaf8abbf7ef7acc
-2025/02/26 03:04:58  info unpack layer: sha256:e6bb380d519e13fe619ab9ea885d15b38233dc4b25e3fd85391e6b84d6c3a518
-INFO:    Creating SIF file...
-```
-
 
 
 ### 环境变量
