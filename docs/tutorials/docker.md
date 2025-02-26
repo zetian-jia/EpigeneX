@@ -319,5 +319,7 @@ docker --config ~/testconfigs/ ps
 
 if use docker desktop the proxy will be change! so do not use docker desktop and docker cli at the same time.
 
+2. docker images and container
 
+镜像是一个包含应用程序及其依赖项的只读模板，通常用于创建容器。容器是镜像的一个实例，运行中的应用。
 

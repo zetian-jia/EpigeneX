@@ -77,11 +77,16 @@ docker run \
 使用 RStudio 界面运行
 ```bash
 docker run \
-  	-v /home/jiazet/R/rstudio/4.5.1:/usr/local/lib/R/host-site-library \
+  	--network host \
+	-v /home/jiazet/R/rstudio/4.5.1:/usr/local/lib/R/host-site-library \
   	-e PASSWORD=123 \
   	-p 8787:8787 \
   	bioconductor/bioconductor_docker:devel
 ```
+Docker 容器默认在退出后删除容器内的所有数据，除非你明确地将数据保存到宿主机或持久化卷
+
+--network host：使用宿主机的网络模式，这通常用于容器和宿主机共享网络资源
+
 
 When to Use Docker Compose?
 Docker Compose is a useful tool when you need to share data between multiple containers or run multi-container applications. It allows you to define and manage multi-container Docker applications with ease.
