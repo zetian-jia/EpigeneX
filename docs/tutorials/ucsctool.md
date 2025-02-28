@@ -1,13 +1,55 @@
 ---
 layout: default
-title: bwtool
+title: ucsctoos
 parent: Tutorials
 nav_order: 11
 ---
 
 
+## quick start
+
+```bash
+apptainer pull docker://xiang2019/ucsctools:v1.04.00
+
+apptainer shell --writable-tmpfs  ucsctools_v1.04.00.sif
+
+ln -s /lib/x86_64-linux-gnu/libcurl-gnutls.so.4 /lib/x86_64-linux-gnu/libcurl.so.4
+
+Apptainer> bedGraphToBigWig 
+bedGraphToBigWig v 2.9 - Convert a bedGraph file to bigWig format (bbi version: 4).
+usage:
+   bedGraphToBigWig in.bedGraph chrom.sizes out.bw
+```
+
+OR fix
+
+```bash
+apptainer build --sandbox ucsctools_v1.04.00 ucsctools_v1.04.00.sif
+
+$ cat ucsctools_v1.04.00/.singularity.d/env/90-environment.sh 
+#!/bin/sh
+# Copyright (c) Contributors to the Apptainer project, established as
+#   Apptainer a Series of LF Projects LLC.
+#   For website terms of use, trademark policy, privacy policy and other
+#   project policies see https://lfprojects.org/policies
+# Copyright (c) 2018-2021, Sylabs Inc. All rights reserved.
+# This software is licensed under a 3-clause BSD license. Please consult
+# https://github.com/apptainer/apptainer/blob/main/LICENSE.md regarding your
+# rights to use or distribute this software.
+
+# Custom environment shell code should follow
+ln -s /lib/x86_64-linux-gnu/libcurl-gnutls.so.4 /lib/x86_64-linux-gnu/libcurl.so.4
 
 
+apptainer build ucsctools_v1.04.01.sif ucsctools_v1.04.00 
+```
+
+Then you can run the tools in the container.
+
+OK !!!
+```bash
+singularity shell --writable --bind /data2:/mnt  ucsctools_v1.04.01.sif
+```
 
 
 ## bedSort
@@ -126,6 +168,23 @@ min: 0.000000
 max: 100.000000
 std: 3.999017
 ```
+
+| **字段**              | **值**                   | **注释**                                |
+|-----------------------|--------------------------|-----------------------------------------|
+| **version**           | 4                        | 数据版本号                              |
+| **isCompressed**      | yes                      | 是否压缩，`yes`表示已压缩                |
+| **isSwapped**         | 0                        | 是否交换，`0`表示未交换                  |
+| **primaryDataSize**   | 174,085,366 bytes        | 主数据大小，单位为字节                   |
+| **primaryIndexSize**  | 874,964 bytes            | 主索引大小，单位为字节                   |
+| **zoomLevels**        | 10                       | 缩放级别数，表示有多少个缩放层级         |
+| **chromCount**        | 23                       | 染色体数量，通常为参考基因组中的染色体数  |
+| **basesCovered**      | 55,547,370               | 覆盖的碱基数目                           |
+| **mean**              | 0.720125                 | 均值，表示数据的平均值                   |
+| **min**               | 0.000000                 | 最小值，表示数据中的最小值               |
+| **max**               | 1.000000                 | 最大值，表示数据中的最大值               |
+| **std**               | 0.276489                 | 标准差，表示数据的离散程度               |
+
+
 chroms
 ```bash
 bigWigInfo file.bw  -chroms
@@ -219,7 +278,18 @@ chr1    10483   10485   1.75455
 
 -max: 合并后的信号值取最大值
 
+## bigWigToBedGraph
 
+```
+bigWigToBedGraph demo.bw -chrom=chr1 -start=1000000 -end=1009000 out.bedGraph
+
+
+$ head out.bedGraph 
+chr1    1000006 1000010 0
+chr1    1000011 1000013 0.06
+chr1    1000016 1000018 0
+chr1    1000023 1000025 0
+```
 
 
 
@@ -238,6 +308,9 @@ docker pull polumechanos/bwtools:latest
 docker run -it -v  software/bwtool:/host polumechanos/bwtools bash
 
 cp /software/bwtool/bwtool /host/bwtool
+
+## OR
+singularity shell --writable --bind /data2:/mnt  --env PATH=/software:$PATH bwtools_latest.sif
 ```
 
 command
@@ -289,7 +362,7 @@ general options:
 ### paste
 用于将多个 BigWig 文件的数据合并到一起，并将其输出为一个 bed 格式的文件，通常用于比较多个 BigWig 文件在相同基因组区域的信号强度。
 ```bash
-/usr/bin/time -v bwtool paste 1.bw 2.bw -decimals=2 -header -skip-NA > out.bed
+/usr/bin/time -v bwtool paste 1.bw 2.bw -decimals=2 -header -skip-NA  -skip-min=0.7 > output.txt
 
 
 $ head out.bed
@@ -298,6 +371,20 @@ chr22   16050096        16050097        1.00    0.92
 chr22   16050097        16050098        1.00    0.92
 chr22   16050113        16050114        1.00    1.00
 ```
+
+-o:noheader file
+
+> output.txt: contains header
+
+| 参数            | 说明                                                                                         |
+|-----------------|----------------------------------------------------------------------------------------------|
+| `1.bw`          | 第一个输入的 BigWig 文件。                                                                   |
+| `2.bw`          | 第二个输入的 BigWig 文件。                                                                   |
+| `-decimals=2`   | 指定输出的小数位数，这里设置为 2，表示输出时保留两位小数。                                     |
+| `-header`       | 保留输入文件的头信息。                                                                       |
+| `-skip-NA`      | 跳过包含 NA（缺失值）的数据。                                                                 |
+| `-skip-min=0.7` | 只输出值大于或等于 0.7 的数据，低于 0.7 的数据将被跳过。                                      |
+| `-o=output.txt` | 指定输出文件路径，结果将保存到 `output.txt` 文件中, no header。`>` keep header                                          |
 
 
 ### find
@@ -406,4 +493,51 @@ options:
                           in the output.
    -unlifted=file.bed     save all the regions from the input not lifted
 ```
+
+### roll
+
+```bash
+bwtool roll mean 100000  -max-NA=2 -min-mean=0.2  demo.bw output.txt
+
+$ head output.txt 
+
+fixedStep chrom=chr6 start=31125902 step=1 span=1
+2.69
+2.69
+2.70
+2.71
+2.72
+```
+| 参数                      | 说明                                                                                           |
+|---------------------------|------------------------------------------------------------------------------------------------|
+| `mean` 或 `total`          | 滑动窗口计算的操作命令，`mean` 表示计算每个窗口的均值，`total` 表示计算每个窗口的总和。   |
+| `size`                     | 窗口的大小，指定每次计算的区域大小（单位为碱基对，例如 100000 表示窗口大小为 100,000 碱基对）。|
+| `file.bw`                  | 输入的 BigWig 文件，需要进行滚动窗口计算的数据文件。                                           |
+| `output.txt`               | 输出文件，保存计算结果。                                                                        |
+| `-max-NA`                  | 指定一个区域中最多允许多少个 `NA` 值（缺失值）才能将该区域视为有效区域。用于过滤含有缺失值的区域。 |
+| `-min-mean=m`              | 只保留均值大于指定阈值 `m` 的区域，移除均值小于该阈值的区域。                                    |
+
+
+NOTE:
+maybe no result
+
+
+### extract
+
+```bash
+bwtool extract bed 100kb.bed demo.bw out.txt
+
+$ head out.txt
+chr1    1       100000  99999   NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+chr1    100001  200000  99999   NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+chr1    200001  300000  99999   NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+chr1    300001  400000  99999   NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+chr1    400001  500000  99999   NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+chr1    500001  600000  99999   NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+chr1    600001  700000  99999   NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+chr1    700001  800000  99999   NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+chr1    800001  900000  99999   NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+```
+
+
 
