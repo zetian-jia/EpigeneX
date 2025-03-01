@@ -457,6 +457,75 @@ chr22   11698432        11698435        40
 chr22   11974699        11974702        34.8
 ```
 
+NOTE:
+
+1. Q & A
+
+Q: Why no data?
+
+```bash
+bwtool window 1000 demo.bw -skip-NA -step=1000 -decimals=3 | awk -f window_ave.awk > out.bed
+```
+
+because in 1kb window, there are many NAs, so to get the mean, we need to fill in the NAs with 0.
+```bash
+$ head out.bed
+chr	20	25	2.00,2.00,1.00,NA,NA
+chr	21	26	2.00,1.00,NA,NA,NA
+```
+
+if we want to get the mean, we need to fill in the NAs with 0. but its wrong, because NA count will be increased.
+
+SO, try
+
+```bash
+BEGIN{OFS="\t"}
+{
+   split($4,av,",");
+   sum=0;
+   count=0;
+   for(i=0;i<1000;i++) {
+      if(av[i] != "NA") {  # 如果不是NA
+         sum = sum + av[i];
+         count = count + 1;
+      }
+   }
+   if(count > 0) {
+      print $1, $2, $3, sum / count;  # 计算非NA值的平均
+   } else {
+      print $1, $2, $3, "NA";  # 如果没有有效数值，则输出NA
+   }
+}
+
+```
+
+Have to fill in missing data with 0 is not a good idea, because it will increase the NA count.
+
+
+```bash
+bwtool window 1000 demo.bw -step=1000 -decimals=3  | awk -f window_ave.awk > out.bed
+
+$ head out.bed
+chr8    133455000       133456000       0.544865
+chr8    133456000       133457000       0.106316
+chr8    133457000       133458000       0.642564
+chr8    133458000       133459000       0.874839
+```
+
+| **Metric** | **Value** |
+|-----------|---------|
+| **SIZE**  | 92M     |
+| **TIME**  | 6 minutes (16:02-16:08) |
+| **Speed** | 10,000 lines/second |
+
+
+```bash
+bedSort out.bed out.bed.sort
+bedGraphToBigWig out.bed.sort ../hg38.chr1-22X.ChromSizes out.bw
+```
+
+<!-- http://localhost:8785/out.bw -->
+![](../../assets/images/igv.track.jpg)
 
 ### summary
 该命令用于对 BigWig 文件进行区域总结，计算每个区域的基本统计数据，如最小值、最大值、均值、中位数等。这对于概览数据分布，尤其是在大规模基因组数据中很有用。
