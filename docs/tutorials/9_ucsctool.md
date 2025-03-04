@@ -1,10 +1,23 @@
 ---
 layout: default
-title: ucsctoos
+title: ucsctool
 parent: Tutorials
-nav_order: 11
+nav_order: 9
 ---
 
+# R
+{:.no_toc }
+best practices for R
+
+# Table of contents
+{:.no_toc.text-delta }
+
+- TOC
+{:toc}
+
+---
+
+# ucsctool
 
 ## quick start
 
@@ -148,6 +161,15 @@ bedSort: /usr/lib/x86_64-linux-gnu/libc.so.6: version 'GLIBC_2.33' not found (re
 ## bigWigInfo
 
 [bigWigInfo](http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/) is a tool for displaying information about a bigWig file. It can display the chromosome names, the number of bases, the file size, and the type of the file (bedGraph, variableStep, or fixedStep).
+
+{: .info-title}
+>What bigWigInfo can do:
+>
+>1. show the chromosome names
+>2. show the mean, min, max, and standard deviation of the data
+
+
+
 
 
 usage
@@ -389,6 +411,9 @@ chr22   16050113        16050114        1.00    1.00
 
 ### find
 用于从 BigWig 文件中查找并提取符合指定条件的区域。通过不同的选项，您可以选择提取局部极值（local extrema）、大于等于某个值的信号（more-equal）或者仅查找局部最大值（maxima）。这些选项有助于根据特定的信号值或模式进行数据筛选。
+
+
+
 ```bash
 bwtool find <local-extrema|more-equal|maxima> <input.bw> <out.bed>
 ```
@@ -424,8 +449,40 @@ chr6    292437  292438  60.00   1000    -
 chr6    450016  450017  0.00    1000    -
 ```
 
+[X]第五列的 1000 可能是 bedGraph 或 BED6 格式的默认评分值，但在 bwtool 的上下文中，它一般没有实际意义，仅作为占位符
+[X]`-`: indicat min; `+` indicate max.
+
+BUGS:
+
+1. can not find local-extrema below 0.01. such as 0.001, 0.0001 in CHG or CHH methylation bigWig files.
+
+
 ### windows
+
+{: .note-title }
+>bwtool windows
+>
+>1. focus on slide in different windows
+
 这个流程使用 bwtool 来对 BigWig 文件进行窗口计算，并通过 awk 脚本来对每个窗口中的信号值进行平均。这样可以帮助平滑数据或提取特定窗口大小的信号。
+
+
+```bash
+bwtool window - slide a window across the bigWig and at each step print data
+   in a format like:
+
+   chrom<TAB>start<TAB>end<TAB>val_start,val_start+1,val_start+2,...,val_end
+
+usage:
+   bwtool window size file.bw
+options:
+   -step=n         skip n bases when sliding window (default 1)
+   -skip-NA        don't output lines (windows) containing any NA values
+   -center         print start and end coordinates of the middle of the window
+                   with size step such that the start/ends are connected each
+                   line (if step < size)
+```
+
 
 这个流程结合了 bwtool 和 awk，首先对 BigWig 文件进行窗口化操作，然后通过 awk 脚本计算每个窗口的平均信号值。适合用来分析大规模基因组数据，尤其是需要对数据进行平滑或去噪时非常有用。
 
@@ -501,7 +558,6 @@ BEGIN{OFS="\t"}
 
 Have to fill in missing data with 0 is not a good idea, because it will increase the NA count.
 
-
 ```bash
 bwtool window 1000 demo.bw -step=1000 -decimals=3  | awk -f window_ave.awk > out.bed
 
@@ -512,6 +568,7 @@ chr8    133457000       133458000       0.642564
 chr8    133458000       133459000       0.874839
 ```
 
+`out.bed` size:
 | **Metric** | **Value** |
 |-----------|---------|
 | **SIZE**  | 92M     |
@@ -528,24 +585,60 @@ bedGraphToBigWig out.bed.sort ../hg38.chr1-22X.ChromSizes out.bw
 ![](../../assets/images/igv.track.jpg)
 
 ### summary
+
+{: .note-title }
+>bwtool summary
+>
+>1. get mean value in different windows
+
 该命令用于对 BigWig 文件进行区域总结，计算每个区域的基本统计数据，如最小值、最大值、均值、中位数等。这对于概览数据分布，尤其是在大规模基因组数据中很有用。
 
 命令非常适合用于对大规模基因组数据进行区域汇总，特别是在需要对信号进行大范围统计时。通过窗口统计，用户可以获取每个区域的基础数据统计量，有助于分析数据的分布或识别异常值。
 
 ```bash
+bwtool summary - provide some summary stats for each region in a bed file
+   or at regular intervals.
+usage:
+   bwtool summary loci input.bw[:chr:start-end] output.txt
+where:
+   -"loci" corresponds to either (a) a bed file with regions to summarize or
+    (b) a size of interval to summarize genome-wide.
+options:
+   -with-quantiles  output 10%/25%/75%/90% quantiles as well surrounding the
+                    median.  With -total, this essentially provides a boxplot.
+   -with-sum-of-squares
+                    output sum of squared deviations from the mean along with 
+                    the other fields
+   -with-sum        output sum, also
+   -skip-median     because the median requires a sorting of the data, this can
+                    be time-consuming for large regions, or when using -total
+   -keep-bed        if the loci bed is given, keep as many bed file
+   -total           only output a summary as if all of the regions are pasted
+                    together
+   -header          put in a header (fields are easy to forget)
+```
+
+
+bwtool summary
+```bash
 bwtool summary 1000000 demo.bw /dev/stdout -header -with-sum
 
 $ bwtool summary 1000000 demo.bw /dev/stdout -header -with-sum | head
 #chrom  start   end     size    num_data        min     max     mean    median  sum
-chr22   0       1000000 1000000 0       NA      NA      NA      NA      NA
-chr22   1000000 2000000 1000000 0       NA      NA      NA      NA      NA
-chr22   2000000 3000000 1000000 0       NA      NA      NA      NA      NA
-chr22   3000000 4000000 1000000 0       NA      NA      NA      NA      NA
-chr22   4000000 5000000 1000000 0       NA      NA      NA      NA      NA
-chr22   5000000 6000000 1000000 0       NA      NA      NA      NA      NA
-chr22   6000000 7000000 1000000 0       NA      NA      NA      NA      NA
-chr22   7000000 8000000 1000000 0       NA      NA      NA      NA      NA
+chr22   0       1000000 1000000        0       NA      NA      NA      NA      NA
+chr22   1000000 2000000 1000000        0       NA      NA      NA      NA      NA
+chr22   2000000 3000000 1000000        0       NA      NA      NA      NA      NA
+chr22   3000000 4000000 1000000        0       NA      NA      NA      NA      NA
+chr22   4000000 5000000 1000000        0       NA      NA      NA      NA      NA
+chr22   5000000 6000000 1000000        0       NA      NA      NA      NA      NA
+chr22   6000000 7000000 1000000        0       NA      NA      NA      NA      NA
+chr22   7000000 8000000 1000000        0       NA      NA      NA      NA      NA
 ```
+
+
+
+
+
 
 
 ### lift

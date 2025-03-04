@@ -2,7 +2,7 @@
 layout: default
 title: conda
 parent: Tutorials
-nav_order: 2
+nav_order: 4
 ---
 
 # conda

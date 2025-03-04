@@ -6,8 +6,18 @@ nav_order: 5
 ---
 
 # git
+{:.no_toc }
+best practices for git
 
+# Table of contents
+{:.no_toc.text-delta }
 
+- TOC
+{:toc}
+
+---
+
+# git
 
 ## example: sphinx
 

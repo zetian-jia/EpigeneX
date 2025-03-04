@@ -2,9 +2,19 @@
 layout: default
 title: python
 parent: Tutorials
-nav_order: 4
+nav_order: 7
 ---
+# python
+{:.no_toc }
+best practices for python
 
+# Table of contents
+{:.no_toc.text-delta }
+
+- TOC
+{:toc}
+
+---
 # python
 
 
