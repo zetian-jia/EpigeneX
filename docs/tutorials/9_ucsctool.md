@@ -900,3 +900,123 @@ mysql --user=genome --host=genome-mysql.soe.ucsc.edu -NAD hg38 -e 'select chrom,
 
 
 
+
+# pyGenomeTracks
+
+[pyGenomeTracks](https://pygenometracks.readthedocs.io/en/latest/content/installation.html) 是一个 Python 库，用于可视化和分析基因组数据。它可以读取各种格式的基因组数据文件，包括
+
+
+## install
+create conda 
+
+```bash
+conda create -n pygenometracks   python=3.9
+
+## conda create -n pygenometracks -c bioconda -c conda-forge  python=3.9 mamba
+```
+
+```bash
+conda activate pygenometracks
+```
+
+install by mamba
+```bash
+mamba install -c conda-forge -c bioconda pygenometracks=3.9 \
+                                         bedtools=2.31.1 \
+					 samtools=1.21 \
+					 tabix=1.11
+					 
+```
+
+## usage
+
+### make_tracks_file
+
+```bash
+usage: make_tracks_file --trackFiles <bigwig file> <bed file> etc. \
+                        -o tracks.ini
+```
+
+`.bw` for bigwig
+
+### pyGenomeTracks
+
+```bash
+usage: pyGenomeTracks --tracks tracks.ini --region chr1:1000000-4000000 -o image.png
+```
+
+# jbrowser
+
+[jboroser](https://jbrowse.org/jb2/docs/quickstart_web/) view
+
+[tabix](https://www.htslib.org/doc/tabix.html)
+```bash
+(grep "^#" in.gff; grep -v "^#" in.gff | sort -t"`printf '\t'`" -k1,1 -k4,4n) | bgzip > sorted.gff.gz;
+tabix -p gff sorted.gff.gz;
+
+tabix sorted.gff.gz chr1:10,000,000-20,000,000;
+```
+
+the same as gtf
+```bash
+$ (grep "^#" genecode.V43.gtf; grep -v "^#" genecode.V43.gtf| sort -t"`printf '\t'`" -k1,1 -k4,4n) | bgzip > sorted.gtf.gz
+$ tabix -p gff sorted.gtf.gz
+
+sorted.gtf.gz
+sorted.gtf.gz.tbi
+
+```
+practice: from UCSC format gff to sort gtf
+
+[gtt regul](https://ftp.ensembl.org/pub/release-113/regulation/homo_sapiens/)
+```bash
+cp homo_sapiens.GRCh38.Regulatory_Build.regulatory_features.20221007.gff.gz hg38.regulatory.gff.gz
+
+gzip -d hg38.regulatory.gff.gz
+
+sed '/^#/!s/^/chr/' hg38.regulatory.gff > tmp.chr
+
+## ls /data/zetianjia/test_jiyinke
+
+gffread tmp.chr  -T -o tmp.gtf
+
+(grep "^#" tmp.gtf ; grep -v "^#" tmp.gtf | sort -t"`printf '\t'`" -k1,1 -k4,4n) | bgzip > hg38.regul.sort.gtf
+tabix -p gff hg38.regul.sort.gtf
+```
+BUG
+```bash
+GFF: discarding unrecognized feature "CTCF_binding_site" ID=CTCF_binding_site:ENSR00000267210
+GFF: discarding unrecognized feature "enhancer" ID=enhancer:ENSR00001190094
+GFF: discarding unrecognized feature "enhancer" ID=enhancer:ENSR00000358230
+GFF: discarding unrecognized feature "open_chromatin_region" ID=open_chromatin_region:ENSR00000782424
+```
+
+你在使用 gffread -E tmp.chr -o ann_simple.gff 时遇到了 "discarding unrecognized feature" 的错误，说明 gffread 无法识别 tmp.chr 文件中的某些 feature 类型，例如：
+
+CTCF_binding_site
+enhancer
+open_chromatin_region
+这些 feature 可能来自 Regulatory Build 数据，但 gffread 主要用于 GTF/GFF3 格式的转录组数据（基因模型，如 exon、CDS、mRNA）。
+它不支持 非标准 feature 类型，所以自动丢弃了它们。
+
+
+
+# bedops
+ver fast tool, for [convert gff to bed bedops](https://github.com/bedops/bedops)
+gfftobed
+
+
+```bash
+tar jxvf bedops_linux_x86_64-vx.y.z.tar.bz2
+
+export PATH=/data/BEDOPS_gff2bed/bin:$PATH
+gff2bed --keep-header < tmp.chr  > hg38.regul.bed
+cut -f 1-3,8 hg38.regul.bed > hg38.regul.4.bed
+
+```
+
+# gffread
+
+
+only convert gff (exon intron) to gtf, cannot convert regular to gtf!!!
+
