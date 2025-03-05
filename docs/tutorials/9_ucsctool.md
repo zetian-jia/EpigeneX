@@ -331,7 +331,7 @@ There are many details in this function:
 1. sort
 1. chromsomes in chromSizes
 
-![](../../assets/images/bederror.png)
+![](../../assets/images/bedOverlap.jpg)
 
 
 {: .info-title}
