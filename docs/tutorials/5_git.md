@@ -148,4 +148,7 @@ git push --set-upstream origin main
 ```
 
 
+# WARNING
+
+千万不要运行`git clean -fd`命令。Ubuntu全部清空。
 

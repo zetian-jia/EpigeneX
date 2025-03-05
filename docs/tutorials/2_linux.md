@@ -126,3 +126,71 @@ flatpak install flathub com.visualstudio.code
 flatpak install flathub org.texstudio.TeXstudio
 ```
 
+
+
+# crash
+
+## gnome-extension ubuntu-appindicators@ubuntu.com crash
+check crash
+```bash
+journalctl -b -1 -xe
+```
+```bash
+3月 05 16:38:47 jiazetian-MS-7E06 gnome-shell[3293]: Unhandled promise rejection. To suppress this warning, add an error handler to your promise chain with .catch() or a try-catch block around your await expression. Stack trace of the failed promise:
+                                                        refreshPropertyOnProxy@/usr/share/gnome-shell/extensions/ubuntu-appindicators@ubuntu.com/util.js:43:38
+                                                        _translateNewSignals/<@/usr/share/gnome-shell/extensions/ubuntu-appindicators@ubuntu.com/appIndicator.js:212:18
+                                                        _translateNewSignals@/usr/share/gnome-shell/extensions/ubuntu-appindicators@ubuntu.com/appIndicator.js:211:50
+                                                        _onProxySignal/<@/usr/share/gnome-shell/extensions/ubuntu-appindicators@ubuntu.com/appIndicator.js:228:56
+                                                        _onProxySignal@/usr/share/gnome-shell/extensions/ubuntu-appindicators@ubuntu.com/appIndicator.js:228:38
+3月 05 16:38:47 jiazetian-MS-7E06 gnome-shell[3293]: Unhandled promise rejection. To suppress this warning, add an error handler to your promise chain with .catch() or a try-catch block around your await expression. Stack trace of the failed promise:
+                                                        refreshPropertyOnProxy@/usr/share/gnome-shell/extensions/ubuntu-appindicators@ubuntu.com/util.js:43:38
+                                                        _translateNewSignals/<@/usr/share/gnome-shell/extensions/ubuntu-appindicators@ubuntu.com/appIndicator.js:212:18
+                                                        _translateNewSignals@/usr/share/gnome-shell/extensions/ubuntu-appindicators@ubuntu.com/appIndicator.js:211:50
+                                                        _onProxySignal/<@/usr/share/gnome-shell/extensions/ubuntu-appindicators@ubuntu.com/appIndicator.js:228:56
+                                                        _onProxySignal@/usr/share/gnome-shell/extensions/ubuntu-appindicators@ubuntu.com/appIndicator.js:228:38
+```
+
+
+从错误日志来看，ubuntu-appindicators@ubuntu.com 这个扩展很可能是导致问题的原因。
+
+错误 "Unhandled promise rejection" 表示某个 JavaScript Promise 在执行过程中失败了，但没有被 .catch() 处理，这可能导致 GNOME Shell 崩溃或无响应。
+
+错误堆栈指向 appIndicator.js 和 util.js，这些文件属于 ubuntu-appindicators 扩展，所以这个扩展极有可能是问题来源。
+如何排查和解决？
+```bash
+gnome-extensions disable ubuntu-appindicators@ubuntu.com
+
+```
+然后尝试重启 GNOME Shell：
+```bash
+Alt + F2，输入 `r`，然后回车  （Wayland 下无效，需要重启）
+```
+或者 直接重启计算机
+
+如果问题持续，可以卸载 ubuntu-appindicators
+```bash
+gnome-extensions uninstall ubuntu-appindicators@ubuntu.com
+
+```
+启用扩展：
+```bash
+gnome-extensions enable ubuntu-appindicators@ubuntu.com
+
+```
+禁用扩展：
+```bash
+gnome-extensions disable ubuntu-appindicators@ubuntu.com
+
+```
+如果你想查看所有扩展（包括禁用的）
+```bash 
+gnome-extensions list
+```
+
+查看当前启用的 GNOME 扩展
+```
+gnome-extensions list --enabled
+```
+
+
+
