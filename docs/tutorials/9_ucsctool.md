@@ -671,6 +671,22 @@ chr22   16050113        16050114        1.00    1.00
 | `-o=output.txt` | 指定输出文件路径，结果将保存到 `output.txt` 文件中, no header。`>` keep header                                          |
 
 
+NOTE:
+
+if there is no -skip-NA, it will output contineous position!!! such as 
+
+	chr19   5038831 5038832 NA      NA      NA      NA      NA
+	chr19   5038832 5038833 NA      NA      NA      NA      NA
+	chr19   5038833 5038834 0.00    0.50    0.14    0.07    0.14
+	chr19   5038834 5038835 0.00    0.50    0.14    0.07    0.14
+	chr19   5038835 5038836 NA      NA      NA      NA      NA
+	chr19   5038836 5038837 NA      NA      NA      NA      NA
+	chr19   5038837 5038838 NA      NA      NA      NA      NA
+
+1. donot use this, because it will process every point!!
+
+1. use bedtools map is OK
+
 ### find
 用于从 BigWig 文件中查找并提取符合指定条件的区域。通过不同的选项，您可以选择提取局部极值（local extrema）、大于等于某个值的信号（more-equal）或者仅查找局部最大值（maxima）。这些选项有助于根据特定的信号值或模式进行数据筛选。
 
