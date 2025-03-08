@@ -575,7 +575,449 @@ options:
    -maxAlloc=N -- Set the maximum memory allocation size to N bytes
 ```
 
+## advance usage
 
+### Data access through the gbdb server
+
+[download](https://hgdownload.soe.ucsc.edu/downloads.html#utilities_downloads) the bigBed file from the gbdb server
+
+The /gbdb fileserver offers access to all files referenced by the Genome Browser tables, with servers in North America and Europe for faster downloads. Many files in the browser, such as bigBed files, are hosted in binary format. For example, in the hg38 database, the `crispr.bb` and `crisprDetails.tab` files for the CRISPR track can be found using the following URLs:
+
+```bash
+bigBedToBed http://hgdownload.soe.ucsc.edu/gbdb/hg38/crispr/crispr.bb -chrom=chr21 -start=25000000 -end=30000000 stdout
+```
+
+### Data Access through the Public MySql Server
+
+UCSC Genome Browser supports a public MySql server with annotation data available for filter and query. For more information on this service, see our [MySQL server](https://genome.ucsc.edu/goldenPath/help/mysql.html) page.
+
+The UCSC Genome Browser uses MariaDB as the backend database server. MariaDB is a community-developed, commercially supported fork of the MySQL relational database management system, intended to remain free and open-source software under the GNU General Public License.
+
+We have two MariaDB databases for public access:
+
+- [x] genome-mysql.soe.ucsc.edu (located on the US west coast)
+- [ ] genome-euro-mysql.soe.ucsc.edu (located in Europe)
+
+You must have MariaDb (MySQL) client libraries installed on your computer.
+
+You can connect to the US MariaDB server using the command:
+
+```bash
+mysql --user=genome --host=genome-mysql.soe.ucsc.edu -A -P 3306
+```
+
+`-A`: speed up
+
+```bash
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 3113235
+Server version: 5.5.5-10.11.8-MariaDB MariaDB Server
+
+Copyright (c) 2000, 2021, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+```
+
+get database
+```bash
+SHOW DATABASES;
+
++--------------------+
+| Database           |
++--------------------+
+| hg17               |
+| hg18               |
+| hg19               |
+| hg19Patch10        |
+| hg19Patch13        |
+| hg19_justpushed    |
+| hg38               |
+| hg38Patch11        |
+| hg38_justpushed    |
+| knownGeneV39       |
+| knownGeneV43       |
+| knownGeneV44       |
+| knownGeneV45       |
+| knownGeneV46       |
+| mm10               |
+| mm39               |
+| mm39_justpushed    |
+| mm5                |
+| mm6                |
+| mm7                |
+| mm8                |
+| mm9                |
+```
+
+进入 hg38 数据库，后续查询都会在 hg38 这个基因组数据库中执行。
+```bash
+USE hg38;
+
+Database changed
+```
+查看数据库中的所有表
+```bash
+SHOW TABLES;
+
++-------------------------------------------------------+
+| Tables_in_hg38                                        |
++-------------------------------------------------------+
+| affyGnf1h                                             |
+| affyU133                                              |
+| affyU95                                               |
+| cpgIslandExt                                          |
+| cpgIslandExtUnmasked                                  |
+| ctgPos2                                               |
+| cytoBand                                              |
+| cytoBandIdeo                                          |
+```
+
+查询 refGene 表中的前 10 条记录
+
+```bash
+SELECT * FROM refGene LIMIT 10;
+```
+这个命令从 refGene 表中选取前 10 条记录
+
+如果你只想查看 refGene 表的前 5 列
+```bash
+SELECT bin, name, chrom, strand, txStart FROM refGene LIMIT 10;
+```
+```bash
++-----+-----------+-------+--------+---------+
+| bin | name      | chrom | strand | txStart |
++-----+-----------+-------+--------+---------+
+| 585 | NR_024540 | chr1  | -      |   14361 |
+| 585 | NR_106918 | chr1  | -      |   17368 |
+| 585 | NR_107062 | chr1  | -      |   17368 |
+| 585 | NR_107063 | chr1  | -      |   17368 |
+| 585 | NR_128720 | chr1  | -      |   17368 |
+| 585 | NR_036051 | chr1  | +      |   30365 |
+| 585 | NR_036266 | chr1  | +      |   30365 |
+| 585 | NR_036267 | chr1  | +      |   30365 |
+| 585 | NR_036268 | chr1  | +      |   30365 |
+| 585 | NR_026818 | chr1  | -      |   34610 |
++-----+-----------+-------+--------+---------+
+10 rows in set (0.24 sec)
+```
+
+如果你想查询特定的基因或染色体的数据，我们可以构造更精准的 SQL 查询
+
+如果你想查询某个染色体（比如 chr1）上的所有基因：
+```bash
+SELECT name, chrom, strand, txStart, txEnd 
+FROM refGene 
+WHERE chrom = 'chr1' 
+LIMIT 10;
+```
+
+```bash
++--------------+-------+--------+-----------+-----------+
+| name         | chrom | strand | txStart   | txEnd     |
++--------------+-------+--------+-----------+-----------+
+| NM_000299    | chr1  | +      | 201283451 | 201332993 |
+| NM_001276351 | chr1  | -      |  67092165 |  67134970 |
+| NM_001005337 | chr1  | +      | 201283505 | 201332989 |
+| NM_001276352 | chr1  | -      |  67092165 |  67134970 |
+| NR_075077    | chr1  | -      |  67092165 |  67134970 |
+| NM_001042681 | chr1  | -      |   8352403 |   8817640 |
+| NM_012102    | chr1  | -      |   8352403 |   8817640 |
+| NR_038261    | chr1  | -      |  41847188 |  42035934 |
+| NM_001042682 | chr1  | -      |   8352403 |   8423832 |
+| NM_001281956 | chr1  | -      |  33513997 |  34165230 |
++--------------+-------+--------+-----------+-----------+
+```
+
+```bash
+SELECT bin, name, chrom, strand, txStart, txEnd, name2
+FROM refGene 
+WHERE name2 = 'TP53';
+```
+
+```bash
++-----+--------------+-------+--------+---------+---------+-------+
+| bin | name         | chrom | strand | txStart | txEnd   | name2 |
++-----+--------------+-------+--------+---------+---------+-------+
+| 643 | NM_001126114 | chr17 | -      | 7668401 | 7687550 | TP53  |
+| 643 | NM_001126113 | chr17 | -      | 7668401 | 7687550 | TP53  |
+| 643 | NM_001126112 | chr17 | -      | 7668401 | 7687550 | TP53  |
+| 643 | NM_001126117 | chr17 | -      | 7668401 | 7675493 | TP53  |
+| 643 | NM_001276761 | chr17 | -      | 7668401 | 7687490 | TP53  |
+| 643 | NM_001276697 | chr17 | -      | 7668401 | 7675244 | TP53  |
+| 643 | NM_001276698 | chr17 | -      | 7668401 | 7675244 | TP53  |
+| 643 | NM_001276699 | chr17 | -      | 7668401 | 7675244 | TP53  |
+| 643 | NM_001276760 | chr17 | -      | 7668401 | 7687490 | TP53  |
+| 643 | NM_001126116 | chr17 | -      | 7668401 | 7675493 | TP53  |
+| 643 | NM_001126115 | chr17 | -      | 7668401 | 7675493 | TP53  |
+| 643 | NM_001126118 | chr17 | -      | 7668401 | 7687550 | TP53  |
+| 643 | NM_001276696 | chr17 | -      | 7668401 | 7687490 | TP53  |
+| 643 | NM_001276695 | chr17 | -      | 7668401 | 7687490 | TP53  |
+| 643 | NM_000546    | chr17 | -      | 7668420 | 7687490 | TP53  |
++-----+--------------+-------+--------+---------+---------+-------+
+15 rows in set (0.23 sec)
+```
+
+
+get cytoBand from hg38:
+`bwtool` use mysql
+```bash
+mysql --user=genome --host=genome-mysql.soe.ucsc.edu -NAD hg38 -e 'select chrom, chromStart, chromEnd, name, gieStain from cytoBand  WHERE chrom = "chr21" '
+```
+
+查找外显子数量最多的基因
+```bash
+SELECT name, name2, chrom, exonCount 
+FROM refGene
+ORDER BY exonCount DESC
+LIMIT 10;
+```
+```bash
++--------------+-------+-------+-----------+
+| name         | name2 | chrom | exonCount |
++--------------+-------+-------+-----------+
+| NM_001267550 | TTN   | chr2  |       363 |
+| NM_001256850 | TTN   | chr2  |       313 |
+| NM_133378    | TTN   | chr2  |       312 |
+| NM_133432    | TTN   | chr2  |       192 |
+| NM_133437    | TTN   | chr2  |       192 |
+| NM_003319    | TTN   | chr2  |       191 |
+| NM_001271208 | NEB   | chr2  |       183 |
+| NM_001164508 | NEB   | chr2  |       182 |
+| NM_001164507 | NEB   | chr2  |       182 |
+| NM_173600    | MUC19 | chr12 |       174 |
++--------------+-------+-------+-----------+
+10 rows in set (0.30 sec)
+```
+
+查找基因组中最长的基因
+```bash
+SELECT name, name2, chrom, (txEnd - txStart) AS gene_length
+FROM refGene
+ORDER BY gene_length DESC
+LIMIT 10;
+```
+
+```bash
++--------------+---------+-------+-------------+
+| name         | name2   | chrom | gene_length |
++--------------+---------+-------+-------------+
+| NM_002839    | PTPRD   | chr9  |     2298757 |
+| NM_000109    | DMD     | chrX  |     2220163 |
+| NM_001351275 | DLG2    | chr11 |     2173361 |
+| NM_001351274 | DLG2    | chr11 |     2173361 |
+| NM_001142699 | DLG2    | chr11 |     2172172 |
+| NM_004006    | DMD     | chrX  |     2092324 |
+| NM_033225    | CSMD1   | chr8  |     2059554 |
+| NM_001351663 | MACROD2 | chr20 |     2057681 |
+| NM_080676    | MACROD2 | chr20 |     2057681 |
+| NM_001351661 | MACROD2 | chr20 |     2057681 |
++--------------+---------+-------+-------------+
+10 rows in set (0.31 sec)
+```
+
+统计每条染色体上有多少个基因
+```bash
+SELECT chrom, COUNT(*) AS gene_count
+FROM refGene
+GROUP BY chrom
+ORDER BY gene_count DESC;
+```
+```bash
++-------------------------+------------+
+| chrom                   | gene_count |
++-------------------------+------------+
+| chr1                    |       7711 |
+| chr2                    |       5525 |
+| chr3                    |       4815 |
+| chr11                   |       4715 |
+| chr19                   |       4664 |
+| chr17                   |       4000 |
+| chr7                    |       3919 |
+| chr6                    |       3907 |
+| chr12                   |       3889 |
+| chr10                   |       3597 |
+| chr5                    |       3471 |
+| chr16                   |       3185 |
+| chr9                    |       3053 |
+| chr4                    |       2989 |
+| chrX                    |       2958 |
+| chr8                    |       2921 |
+| chr15                   |       2648 |
+| chr14                   |       2440 |
+| chr20                   |       1954 |
+| chr22                   |       1660 |
+| chr13                   |       1499 |
+| chr18                   |       1268 |
+| chr21                   |       1091 |
+```
+
+查询 BRCA1 基因的所有转录本
+```bash
+SELECT name, name2, chrom, txStart, txEnd, exonCount
+FROM refGene
+WHERE name2 = 'BRCA1';
+```
+
+```bash
++-----------+-------+-------+----------+----------+-----------+
+| name      | name2 | chrom | txStart  | txEnd    | exonCount |
++-----------+-------+-------+----------+----------+-----------+
+| NR_027676 | BRCA1 | chr17 | 43044294 | 43125364 |        23 |
+| NM_007298 | BRCA1 | chr17 | 43044294 | 43124115 |        22 |
+| NM_007297 | BRCA1 | chr17 | 43044294 | 43125364 |        22 |
+| NM_007294 | BRCA1 | chr17 | 43044294 | 43125364 |        23 |
+| NM_007299 | BRCA1 | chr17 | 43044294 | 43125364 |        22 |
+| NM_007300 | BRCA1 | chr17 | 43044294 | 43125364 |        24 |
++-----------+-------+-------+----------+----------+-----------+
+6 rows in set (0.24 sec)
+```
+
+计算 TP53 基因的长度
+```bash
+SELECT name, name2, (txEnd - txStart) AS gene_length
+FROM refGene
+WHERE name2 = 'TP53';
+```
+```bash
++--------------+-------+-------------+
+| name         | name2 | gene_length |
++--------------+-------+-------------+
+| NM_001126114 | TP53  |       19149 |
+| NM_001126113 | TP53  |       19149 |
+| NM_001126112 | TP53  |       19149 |
+| NM_001126117 | TP53  |        7092 |
+| NM_001276761 | TP53  |       19089 |
+| NM_001276697 | TP53  |        6843 |
+| NM_001276698 | TP53  |        6843 |
+| NM_001276699 | TP53  |        6843 |
+| NM_001276760 | TP53  |       19089 |
+| NM_001126116 | TP53  |        7092 |
+| NM_001126115 | TP53  |        7092 |
+| NM_001126118 | TP53  |       19149 |
+| NM_001276696 | TP53  |       19089 |
+| NM_001276695 | TP53  |       19089 |
+| NM_000546    | TP53  |       19070 |
++--------------+-------+-------------+
+15 rows in set (0.23 sec)
+```
+
+结合 UCSC Browser 查看基因
+```bash
+https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr17:7571720-7590863
+```
+
+计算基因组中 CpG 岛的密度
+CpG 岛（CpG islands, CGIs） 是 高 GC 含量 和 高 CpG 密度 的区域，通常位于启动子区域。可以用 UCSC 数据库查询：
+```bash
+SELECT chrom, chromStart, chromEnd, (chromEnd - chromStart) AS length
+FROM cpgIslandExt
+ORDER BY length DESC
+LIMIT 10;
+```
+
+```bash
++---------------------+------------+-----------+--------+
+| chrom               | chromStart | chromEnd  | length |
++---------------------+------------+-----------+--------+
+| chrX                |  115843397 | 115889109 |  45712 |
+| chr4_KQ983258v1_alt |     157831 |    203139 |  45308 |
+| chr4_KQ983257v1_fix |     157831 |    201671 |  43840 |
+| chr1                |  161440076 | 161472713 |  32637 |
+| chr4                |  190065227 | 190092454 |  27227 |
+| chr10               |  133740607 | 133761247 |  20640 |
+| chr10               |  133664428 | 133685058 |  20630 |
+| chrX                |   40094181 |  40109994 |  15813 |
+| chr10               |   75395370 |  75409842 |  14472 |
+| chr7                |    1229529 |   1243095 |  13566 |
++---------------------+------------+-----------+--------+
+10 rows in set (0.27 sec)
+```
+
+统计特定基因的 CG 含量
+如果你想查看某个基因（比如 TP53）的 CG 含量
+```bash
+SELECT name2, chrom, txStart, txEnd, 
+       (txEnd - txStart) AS gene_length, 
+       (SELECT COUNT(*) FROM cpgIslandExt 
+        WHERE cpgIslandExt.chrom = refGene.chrom 
+          AND cpgIslandExt.chromStart >= refGene.txStart 
+          AND cpgIslandExt.chromEnd <= refGene.txEnd) AS cpg_count
+FROM refGene
+WHERE name2 = 'TP53';
+```
+
+查看表结构
+```bash
+DESCRIBE wgEncodeRegDnaseUwWi38Signal;
+```
+查看表结构
+```bash
+SHOW COLUMNS FROM wgEncodeRegDnaseUwWi38Signal;
+```
+
+```bash
+mysql> SELECT * FROM wgEncodeRegDnaseUwWi38Signal LIMIT 10;
+
++-----------------------------------------------------------------+
+| fileName                                                        |
++-----------------------------------------------------------------+
+| /gbdb/hg38/bbi/wgEncodeRegDnase/wgEncodeRegDnaseUwWi38Signal.bw |
++-----------------------------------------------------------------+
+1 row in set (0.24 sec)
+```
+
+### ucsctools online
+```bash
+bigWigToBedGraph http://hgdownload.soe.ucsc.edu/gbdb/hg38/bbi/wgEncodeRegDnase/wgEncodeRegDnaseUwWi38Signal.bw test.bed
+```
+
+```bash
+$ head test.bed        
+                            
+chr1    10605   10645   0
+chr1    10785   10805   0
+chr1    10825   10845   0
+chr1    13305   13345   0.418422
+chr1    13945   14005   0
+chr1    15245   15305   0
+chr1    15885   15925   0
+chr1    16065   16125   0
+chr1    16225   16245   0
+chr1    16245   16325   0.418422
+```
+
+
+### Using the MariaDB server with our utilities
+MariaDB数据库还可以由基因组浏览器源树中的众多实用程序使用。其中一些实用程序需要密码，因此如果您想访问美国公共MariaDB服务器，您需要将以下规范添加到您的
+
+```bash
+$ $HOME/.hg.conf
+$ chmod 600 $HOME/.hg.conf
+
+#US MariaDB server
+db.host=genome-mysql.soe.ucsc.edu
+db.user=genomep
+db.password=password
+central.db=hgcentral
+central.host=genome-mysql.soe.ucsc.edu
+central.user=genomep
+central.password=password
+gbdbLoc1=http://hgdownload.soe.ucsc.edu/gbdb/
+forceTwoBit=on
+```
+
+
+### download all software by rsync
+
+[here](https://hgdownload.soe.ucsc.edu/downloads.html#utilities_downloads)
+
+```bash
+rsync -aP hgdownload.soe.ucsc.edu::genome/admin/exe/linux.x86_64/ ./
+```
 
 ## bwtool
 
@@ -983,11 +1425,7 @@ chr1    800001  900000  99999   NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
 
 
 
-bwtool use mysql
 
-```bash
-mysql --user=genome --host=genome-mysql.soe.ucsc.edu -NAD hg38 -e 'select chrom, chromStart, chromEnd, name, gieStain from cytoBand  WHERE chrom = "chr21" '
-```
 
 
 
